@@ -1,0 +1,1055 @@
+{
+	"info": {
+		"_postman_id": "e96e7a36-bdc5-464b-ae3f-abe5e9cecada",
+		"name": "Practica_3_Hotel",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "10031693"
+	},
+	"item": [
+		{
+			"name": "get /HealthCheck - 201",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"    pm.response.to.have.status(\"Created\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is text/plain\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has 'Created' text\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Created\");\r",
+							"})\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/ping",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"ping"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "post /GenerateToken - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a token\", function () {\r",
+							"    pm.expect(pm.response.json().token).to.exist;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Token length must be greater than 0\", function () {\r",
+							"    pm.expect(pm.response.json().token.length).to.be.greaterThan(0);\r",
+							"});\r",
+							"\r",
+							"if (pm.response.code === 200) {\r",
+							"    pm.collectionVariables.set(\"authToken\", pm.response.json().token)\r",
+							"}"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\" : \"admin\",\r\n    \"password\" : \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{url}}/auth",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "post /CreateBooking - 200",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var randomName = pm.variables.replaceIn(\"{{$randomFirstName}}\");\r",
+							"pm.collectionVariables.set(\"firstName\", randomName);\r",
+							"\r",
+							"var randomLast = pm.variables.replaceIn(\"{{$randomLastName}}\");\r",
+							"pm.collectionVariables.set(\"lastName\", randomLast);\r",
+							"\r",
+							"var randomPrice = pm.variables.replaceIn(\"{{$randomInt}}\");\r",
+							"pm.collectionVariables.set(\"totalPrice\", randomPrice);\r",
+							"\r",
+							"var randomDepositPaid = pm.variables.replaceIn(\"{{$randomBoolean}}\");\r",
+							"pm.collectionVariables.set(\"isDepositPaid\", randomDepositPaid);\r",
+							"\r",
+							"var randomCheckIn = pm.variables.replaceIn(\"{{$isoTimestamp}}\");\r",
+							"randomCheckIn = randomCheckIn.split('T')[0];\r",
+							"pm.collectionVariables.set(\"checkIn\", randomCheckIn);\r",
+							"\r",
+							"var randomCheckOut = pm.variables.replaceIn(\"{{$isoTimestamp}}\");\r",
+							"randomCheckOut = randomCheckOut.split('T')[0];\r",
+							"pm.collectionVariables.set(\"checkOut\", randomCheckOut);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"if (pm.response.code === 200) {\r",
+							"    pm.collectionVariables.set(\"bookingId\", pm.response.json().bookingid);\r",
+							"}\r",
+							"\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a BookingId\", function () {\r",
+							"    pm.expect(pm.response.json().bookingid).to.exist;\r",
+							"    pm.expect(pm.response.json().bookingid).to.be.a(\"number\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response firstname equals Request firstname\", function () {\r",
+							"    var collectionFirstName = pm.collectionVariables.get(\"firstName\");\r",
+							"    var responseFirstName = pm.response.json().booking.firstname;\r",
+							"    pm.expect(responseFirstName).to.equal(collectionFirstName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response lastname equals Request lastname\", function () {\r",
+							"    var collectionLastName = pm.collectionVariables.get(\"lastName\");\r",
+							"    var responseLastName = pm.response.json().booking.lastname;\r",
+							"    pm.expect(responseLastName).to.equal(collectionLastName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response totalprice equals Request totalprice\", function () {\r",
+							"    var collectionTotalPrice =  pm.collectionVariables.get(\"totalPrice\");\r",
+							"    var responseTotalPrice =pm.response.json().booking.totalprice.toString();\r",
+							"    pm.expect(responseTotalPrice).to.equal(collectionTotalPrice);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response depositpaid equals Request depositpaid\", function () {\r",
+							"    var collectionDepositPaid = pm.collectionVariables.get(\"isDepositPaid\");\r",
+							"    var responseDepositPaid = pm.response.json().booking.depositpaid.toString();\r",
+							"    pm.expect(responseDepositPaid).to.equal(collectionDepositPaid);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Response checkin date equals Request checkin date\", function () {\r",
+							"    var collectionCheckIn = pm.collectionVariables.get(\"checkIn\");\r",
+							"    var responseCheckIn = pm.response.json().booking.bookingdates.checkin;\r",
+							"    pm.expect(responseCheckIn).to.equal(collectionCheckIn);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response checkout date equals Request checkout date\", function () {\r",
+							"    var collectionCheckOut = pm.collectionVariables.get(\"checkOut\");\r",
+							"    var responseCheckOut = pm.response.json().booking.bookingdates.checkout;\r",
+							"    pm.expect(responseCheckOut).to.equal(collectionCheckOut);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstName}}\",\r\n    \"lastname\" : \"{{lastName}}\",\r\n    \"totalprice\" : {{totalPrice}},\r\n    \"depositpaid\" : {{isDepositPaid}},\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"{{checkIn}}\",\r\n        \"checkout\" : \"{{checkOut}}\"\r\n    },\r\n    \"additionalneeds\" : \"Breakfast\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{url}}/booking",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /BookingById -200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response firstname equals Collection firstname\", function () {\r",
+							"    var collectionFirstName = pm.collectionVariables.get(\"firstName\");\r",
+							"    var responseFirstName = pm.response.json().firstname;\r",
+							"    pm.expect(responseFirstName).to.equal(collectionFirstName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response lastname equals Collection lastname\", function () {\r",
+							"    var collectionLastName = pm.collectionVariables.get(\"lastName\");\r",
+							"    var responseLastName = pm.response.json().lastname;\r",
+							"    pm.expect(responseLastName).to.equal(collectionLastName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response totalprice equals Collection totalprice\", function () {\r",
+							"    var collectionTotalPrice =  pm.collectionVariables.get(\"totalPrice\");\r",
+							"    var responseTotalPrice =pm.response.json().totalprice.toString();\r",
+							"    pm.expect(responseTotalPrice).to.equal(collectionTotalPrice);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response depositpaid equals Collection depositpaid\", function () {\r",
+							"    var collectionDepositPaid = pm.collectionVariables.get(\"isDepositPaid\");\r",
+							"    var responseDepositPaid = pm.response.json().depositpaid.toString();\r",
+							"    pm.expect(responseDepositPaid).to.equal(collectionDepositPaid);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Response checkin date equals Collection checkin date\", function () {\r",
+							"    var collectionCheckIn = pm.collectionVariables.get(\"checkIn\");\r",
+							"    var responseCheckIn = pm.response.json().bookingdates.checkin;\r",
+							"    pm.expect(responseCheckIn).to.equal(collectionCheckIn);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response checkout date equals Collection checkout date\", function () {\r",
+							"    var collectionCheckOut = pm.collectionVariables.get(\"checkOut\");\r",
+							"    var responseCheckOut = pm.response.json().bookingdates.checkout;\r",
+							"    pm.expect(responseCheckOut).to.equal(collectionCheckOut);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking/{{bookingId}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /BookingIdByName - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a bookingId\", function () {\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.exist;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response bookingId equals Collection bookingId\", function () {\r",
+							"    var collectionBookingId = pm.collectionVariables.get(\"bookingId\");\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.equal(collectionBookingId);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking?firstname={{firstName}}&lastname={{lastName}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "2020-01-01",
+							"disabled": true
+						},
+						{
+							"key": "checkout",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "firstname",
+							"value": "{{firstName}}"
+						},
+						{
+							"key": "lastname",
+							"value": "{{lastName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /BookingIdByDate - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a bookingId\", function () {\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.exist;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response bookingId equals Collection bookingId\", function () {\r",
+							"    var collectionBookingId =  pm.collectionVariables.get(\"bookingId\");\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.equal(collectionBookingId);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking?checkin={{checkIn}}&checkout={{checkOut}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "2020-01-01",
+							"disabled": true
+						},
+						{
+							"key": "checkout",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "checkin",
+							"value": "{{checkIn}}"
+						},
+						{
+							"key": "checkout",
+							"value": "{{checkOut}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "put /UpdateBooking - 200",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var randomName = pm.variables.replaceIn(\"{{$randomFirstName}}\");\r",
+							"pm.collectionVariables.set(\"firstName\", randomName);\r",
+							"\r",
+							"var randomLast = pm.variables.replaceIn(\"{{$randomLastName}}\");\r",
+							"pm.collectionVariables.set(\"lastName\", randomLast);\r",
+							"\r",
+							"var randomPrice = pm.variables.replaceIn(\"{{$randomInt}}\");\r",
+							"pm.collectionVariables.set(\"totalPrice\", randomPrice);\r",
+							"\r",
+							"var randomDepositPaid = pm.variables.replaceIn(\"{{$randomBoolean}}\");\r",
+							"pm.collectionVariables.set(\"isDepositPaid\", randomDepositPaid);\r",
+							"console.log(\"pre-request: \" + pm.collectionVariables.get(\"isDepositPaid\"));\r",
+							"\r",
+							"var randomCheckIn = pm.variables.replaceIn(\"{{$isoTimestamp}}\");\r",
+							"randomCheckIn = randomCheckIn.split('T')[0];\r",
+							"pm.collectionVariables.set(\"checkIn\", randomCheckIn);\r",
+							"\r",
+							"var randomCheckOut = pm.variables.replaceIn(\"{{$isoTimestamp}}\");\r",
+							"randomCheckOut = randomCheckOut.split('T')[0];\r",
+							"pm.collectionVariables.set(\"checkOut\", randomCheckOut);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response firstname equals Request firstname\", function () {\r",
+							"    var collectionFirstName = pm.collectionVariables.get(\"firstName\");\r",
+							"    var responseFirstName = pm.response.json().firstname;\r",
+							"    pm.expect(responseFirstName).to.equal(collectionFirstName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response lastname equals Request lastname\", function () {\r",
+							"    var collectionLastName = pm.collectionVariables.get(\"lastName\");\r",
+							"    var responseLastName = pm.response.json().lastname;\r",
+							"    pm.expect(responseLastName).to.equal(collectionLastName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response totalprice equals Request totalprice\", function () {\r",
+							"    var collectionTotalPrice =  pm.collectionVariables.get(\"totalPrice\");\r",
+							"    var responseTotalPrice =pm.response.json().totalprice.toString();\r",
+							"    pm.expect(responseTotalPrice).to.equal(collectionTotalPrice);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response depositpaid equals Request depositpaid\", function () {\r",
+							"    var collectionDepositPaid = pm.collectionVariables.get(\"isDepositPaid\");\r",
+							"    var responseDepositPaid = pm.response.json().depositpaid.toString();\r",
+							"    pm.expect(responseDepositPaid).to.equal(collectionDepositPaid);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response checkin date equals Request checkin date\", function () {\r",
+							"    var collectionCheckIn = pm.collectionVariables.get(\"checkIn\");\r",
+							"    var responseCheckIn = pm.response.json().bookingdates.checkin;\r",
+							"    pm.expect(responseCheckIn).to.equal(collectionCheckIn);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response checkout date equals Request checkout date\", function () {\r",
+							"    var collectionCheckOut = pm.collectionVariables.get(\"checkOut\");\r",
+							"    var responseCheckOut = pm.response.json().bookingdates.checkout;\r",
+							"    pm.expect(responseCheckOut).to.equal(collectionCheckOut);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"accept": true
+				}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Cookie",
+						"value": "token=\"{{authToken}}\"",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstName}}\",\r\n    \"lastname\" : \"{{lastName}}\",\r\n    \"totalprice\" : {{totalPrice}},\r\n    \"depositpaid\" : {{isDepositPaid}},\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"{{checkIn}}\",\r\n        \"checkout\" : \"{{checkOut}}\"\r\n    },\r\n    \"additionalneeds\" : \"Breakfast\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{url}}/booking/{{bookingId}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /BookingIdByName - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a bookingId\", function () {\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.exist;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response bookingId equals Collection bookingId\", function () {\r",
+							"    var collectionBookingId =  parseInt(pm.collectionVariables.get(\"bookingId\"));\r",
+							"    var responseBookingId =pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.equal(collectionBookingId);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking?firstname={{firstName}}&lastname={{lastName}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "2020-01-01",
+							"disabled": true
+						},
+						{
+							"key": "checkout",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "firstname",
+							"value": "{{firstName}}"
+						},
+						{
+							"key": "lastname",
+							"value": "{{lastName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "patch /PartialUpdate - 200",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"var randomName = pm.variables.replaceIn(\"{{$randomFirstName}}\");\r",
+							"pm.collectionVariables.set(\"firstName\", randomName);\r",
+							"\r",
+							"var randomLast = pm.variables.replaceIn(\"{{$randomLastName}}\");\r",
+							"pm.collectionVariables.set(\"lastName\", randomLast);"
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response firstname equals Request firstname\", function () {\r",
+							"    var collectionFirstName = pm.collectionVariables.get(\"firstName\");\r",
+							"    var responseFirstName = pm.response.json().firstname;\r",
+							"    pm.expect(responseFirstName).to.equal(collectionFirstName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response lastname equals Request lastname\", function () {\r",
+							"    var collectionLastName = pm.collectionVariables.get(\"lastName\");\r",
+							"    var responseLastName = pm.response.json().lastname;\r",
+							"    pm.expect(responseLastName).to.equal(collectionLastName);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response totalprice equals Request totalprice\", function () {\r",
+							"    var collectionTotalPrice =  pm.collectionVariables.get(\"totalPrice\");\r",
+							"    var responseTotalPrice =pm.response.json().totalprice.toString();\r",
+							"    pm.expect(responseTotalPrice).to.equal(collectionTotalPrice);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response depositpaid equals Request depositpaid\", function () {\r",
+							"    var collectionDepositPaid = pm.collectionVariables.get(\"isDepositPaid\");\r",
+							"    var responseDepositPaid = pm.response.json().depositpaid.toString();\r",
+							"    pm.expect(responseDepositPaid).to.equal(collectionDepositPaid);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response checkin date equals Request checkin date\", function () {\r",
+							"    var collectionCheckIn = pm.collectionVariables.get(\"checkIn\");\r",
+							"    var responseCheckIn = pm.response.json().bookingdates.checkin;\r",
+							"    pm.expect(responseCheckIn).to.equal(collectionCheckIn);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response checkout date equals Request checkout date\", function () {\r",
+							"    var collectionCheckOut = pm.collectionVariables.get(\"checkOut\");\r",
+							"    var responseCheckOut = pm.response.json().bookingdates.checkout;\r",
+							"    pm.expect(responseCheckOut).to.equal(collectionCheckOut);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=\"{{authToken}}\"",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstName}}\",\r\n    \"lastname\" : \"{{lastName}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{url}}/booking/{{bookingId}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /BookingIdByName - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a bookingId\", function () {\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.exist;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response bookingId equals Collection bookingId\", function () {\r",
+							"    var collectionBookingId = pm.collectionVariables.get(\"bookingId\");\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.equal(collectionBookingId);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking?firstname={{firstName}}&lastname={{lastName}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					],
+					"query": [
+						{
+							"key": "checkin",
+							"value": "2020-01-01",
+							"disabled": true
+						},
+						{
+							"key": "checkout",
+							"value": "",
+							"disabled": true
+						},
+						{
+							"key": "firstname",
+							"value": "{{firstName}}"
+						},
+						{
+							"key": "lastname",
+							"value": "{{lastName}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /AllBookings - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    pm.response.to.have.status(\"OK\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('application/json');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has a bookingId\", function () {\r",
+							"    var responseBookingId = pm.response.json()[0].bookingid;\r",
+							"    pm.expect(responseBookingId).to.exist;\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete /DeleteBooking - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 201\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"    pm.response.to.have.status(\"Created\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is 'text/plain'\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body to have 'Created' text\", function () {\r",
+							"     pm.expect(pm.response.text()).to.include(\"Created\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Cookie",
+						"value": "token=\"{{authToken}}\"",
+						"type": "text"
+					},
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "https://{{url}}/booking/{{bookingId}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					],
+					"query": [
+						{
+							"key": "",
+							"value": null,
+							"disabled": true
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "get /BookingAfterDelete - 404",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"    pm.response.to.have.status(\"Not Found\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type is present\", function () {\r",
+							"    pm.response.to.have.header(\"Content-Type\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Content-Type header is application/json\", function () {\r",
+							"    pm.expect(pm.response.headers.get('Content-Type')).to.include('text/plain; charset=utf-8');\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body has 'Not Found' text\", function () {\r",
+							"    pm.expect(pm.response.text()).to.include(\"Not Found\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "https://{{url}}/booking/{{bookingId}}",
+					"protocol": "https",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "url",
+			"value": "restful-booker.herokuapp.com",
+			"type": "string"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "firstName",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "lastName",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "bookingId",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "checkIn",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "checkOut",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "isDepositPaid",
+			"value": "",
+			"type": "string"
+		},
+		{
+			"key": "totalPrice",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
