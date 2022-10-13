@@ -7,8 +7,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
-
-import static io.restassured.RestAssured.baseURI;
 import static io.restassured.RestAssured.given;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,9 +18,6 @@ public class eCommerce {
     private static String accessToken;
     private static String accountId;
     private static String uuid;
-    private static String addressID;
-    private static String adID;
-
 
     @DisplayName("Obtener Token")
     private String getAccessToken() {
@@ -44,6 +39,63 @@ public class eCommerce {
         this.uuid = jsonResponse.get("account.uuid");
 
         return this.accessToken;
+    }
+
+    @DisplayName("Obtener addressID")
+    private String getAddressID() {
+        String accessToken = getAccessToken();
+        RestAssured.baseURI = String.format("https://%s/addresses/v1/create?", baseURL);
+
+        Response response = given()
+                .log().all()
+                .queryParam("lang", "es")
+                .header("Content-type","application/x-www-form-urlencoded")
+                .header("Accept","application/json, text/plain, */*")
+                .auth().preemptive().basic(uuid,accessToken)
+                .formParam("contact","Raul Gomez")
+                .formParam("phone","5588779944")
+                .formParam("rfc","GOLR720425")
+                .formParam("zipCode","56871")
+                .formParam("exteriorInfo","Calle Zuno 2023")
+                .formParam("interiorInfo","14")
+                .formParam("region","9")
+                .formParam("municipality","211")
+                .formParam("area","68135")
+                .formParam("alias","Oficina")
+                .post();
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+        String addressID = jsonPathEvaluator.get("addressID");
+        return addressID;
+    }
+    @DisplayName("Obtener AdID")
+    private String getAdID() {
+        String accessToken = getAccessToken();
+        RestAssured.baseURI = String.format("https://%s/v2/accounts/%s/up" , baseURL, uuid);
+
+        String bodyRequest = "{" +
+                "\"category\":\"8143\"," +
+                "\"subject\":\"Avaluobienesraices\"," +
+                "\"body\":\"Presupuestosincompromiso\"," +
+                "\"region\":\"5\"," +
+                "\"municipality\":\"86131\"," +
+                "\"area\":\"86181\"," +
+                "\"price\":\"9999\"," +
+                "\"phone_hidden\":\"true\"," +
+                "\"show_phone\":\"false\"," +
+                "\"contact_phone\":\"6062575099\"}";
+
+        Response response = given()
+                .header("Content-type","application/json")
+                .header("Accept","application/json, text/plain, */*")
+                .header("x-source","PHOENIX_DESKTOP")
+                .auth().preemptive().basic(uuid,accessToken)
+                .body(bodyRequest)
+                .post();
+
+        JsonPath jsonPathEvaluator = response.jsonPath();
+        String adID = jsonPathEvaluator.get("data.ad.ad_id");
+        return adID;
     }
 
     @Test
@@ -440,7 +492,6 @@ public class eCommerce {
     @DisplayName("Test case: POST /CreateAddress - 201")
     public void postCreateAddress_201() {
         String accessToken = getAccessToken();
-
         RestAssured.baseURI = String.format("https://%s/addresses/v1/create?", baseURL);
 
         Response response = given()
@@ -483,12 +534,6 @@ public class eCommerce {
         assertNotNull(bodyResponse);
         // Test: Response body has an Address ID
         assertTrue(bodyResponse.contains("addressID"));
-
-        // If response code == 201, set addressID variable
-        if (response.getStatusCode() == 201) {
-            this.addressID = jsonPathEvaluator.get("addressID");
-            System.out.println("Address id: " + this.addressID);
-        }
     }
 
     @Test
@@ -496,9 +541,8 @@ public class eCommerce {
     @DisplayName("Test case: PUT /UpdateAddress - 200")
     public void putUpdateAddress_200() {
         String accessToken = getAccessToken();
-        System.out.println("Address id: " + this.addressID);
+        String addressID = getAddressID();
         RestAssured.baseURI = String.format("https://%s/addresses/v1/modify/%s", baseURL, addressID);
-        System.out.println("Base Uri: " + baseURI);
 
         Response response = given()
                 .log().all()
@@ -542,7 +586,7 @@ public class eCommerce {
         assertTrue(bodyResponse.contains("message"));
         // Test: Response body has a valid
         String responseMessage = jsonPathEvaluator.get("message");
-        assertEquals(responseMessage, this.addressID + " modified correctly");
+        assertEquals(responseMessage, addressID + " modified correctly");
     }
 
     @Test
@@ -550,9 +594,8 @@ public class eCommerce {
     @DisplayName("Test case: DELETE /DeleteAddress - 200")
     public void deleteDeleteAddress_200() {
         String accessToken = getAccessToken();
-        System.out.println("Address id: " + this.addressID);
+        String addressID = getAddressID();
         RestAssured.baseURI = String.format("https://%s/addresses/v1/delete/%s", baseURL, addressID);
-        System.out.println("Base Uri: " + baseURI);
 
         Response response = given()
                 .log().all()
@@ -584,7 +627,7 @@ public class eCommerce {
         assertTrue(bodyResponse.contains("message"));
         // Test: Response body has a valid
         String responseMessage = jsonPathEvaluator.get("message");
-        assertEquals(responseMessage, this.addressID + " deleted correctly");
+        assertEquals(responseMessage, addressID + " deleted correctly");
     }
 
     @Test
@@ -673,11 +716,142 @@ public class eCommerce {
         assertNotNull(bodyResponse);
         // Test: Response body has an ad_id
         assertTrue(bodyResponse.contains("ad_id"));
-        // If response code == 200, set adID variable
-        if (response.getStatusCode() == 200) {
-            this.adID = jsonPathEvaluator.get("data.ad.ad_id");
-            System.out.println("Ad_id: " + this.adID);
-        }
     }
+
+    @Test
+    @Order(14)
+    @DisplayName("Test case: PUT /EditAdd - 200")
+    public void putEditAdd_200() {
+        String accessToken = getAccessToken();
+        String adID = getAdID();
+        RestAssured.baseURI = String.format("https://%s/v2/accounts/%s/up/%s" , baseURL, uuid, adID);
+
+        // Random 10 digit phone number
+        long randPhone = (long) Math.floor(Math.random() * 9_000_000_000L) + 1_000_000_000L;
+        String bodyRequest = "{" +
+                "\"category\":\"8143\"," +
+                "\"subject\":\"Avaluobienesraices\"," +
+                "\"body\":\"Presupuestosincompromiso.Llamenos\"," +
+                "\"region\":\"5\"," +
+                "\"municipality\":\"86131\"," +
+                "\"area\":\"86181\"," +
+                "\"price\":\"9999\"," +
+                "\"phone_hidden\":\"true\"," +
+                "\"show_phone\":\"false\"," +
+                "\"contact_phone\":\""+randPhone+"\"}";
+
+        Response response = given()
+                .header("Content-type","application/json")
+                .header("Accept","application/json, text/plain, */*")
+                .header("x-source","PHOENIX_DESKTOP")
+                .auth().preemptive().basic(uuid,accessToken)
+                .body(bodyRequest)
+                .put();
+
+        // Validate the Response Code
+        // Test: Response Code == 200
+        assertEquals(200, response.getStatusCode(), "Correct status code returned");
+        // Test: Response status line is "HTTP/1.1 200 OK"
+        String statusLine = response.getStatusLine();
+        assertEquals(statusLine, "HTTP/1.1 200 OK", "200 OK message is returned");
+
+        // Validate Headers Response
+        String headersResponse = response.getHeaders().toString();
+        // Test: Content-Type is present
+        assertTrue(headersResponse.contains("Content-Type"));
+        // Test: Content-Type header equals "application/json charset=utf-8"
+        String contentType = response.header("Content-Type");
+        assertEquals(contentType, "application/json; charset=utf-8");
+
+        // Validate the Response Body
+        String bodyResponse = response.getBody().prettyPrint();
+        JsonPath jsonPathEvaluator = response.jsonPath();
+        // Test: Response body is not empty
+        assertNotNull(bodyResponse);
+        // Test: Response body has an ad_id
+        assertTrue(bodyResponse.contains("ad_id"));
+        // Test: Response body has a valid ad_id
+        String responseAdId = jsonPathEvaluator.get("data.ad.ad_id");
+        assertEquals(responseAdId, adID);
+    }
+    @Test
+    @Order(15)
+    @DisplayName("Test case: DELETE /DeleteAdd - 403 Anuncio no indexado")
+    public void deleteDeleteAdd_403() {
+        String accessToken = getAccessToken();
+        String adID = getAdID();
+        RestAssured.baseURI = String.format("https://%s/nga/api/v1%s/klsft/%s" , baseURL, accountId, adID);
+
+        String bodyRequest = "{\"delete_reason\":{\"code\":\"0\"}}";
+
+        Response response = given()
+                .header("Accept","application/json, text/plain, */*")
+                .header("Accept-Encoding", "gzip, deflate, br")
+                .header("Authorization", "tag:scmcoord.com,2013:api " + accessToken)
+                .header("Content-type","application/json")
+                .header("Connection", "keep-alive")
+                .body(bodyRequest)
+                .delete();
+
+        // Validate the Response Code
+        // Test: Response Code == 403
+        assertEquals(403, response.getStatusCode(), "Correct status code returned");
+        // Test: Response status line is "HTTP/1.1 403 FORBIDDEN"
+        String statusLine = response.getStatusLine();
+        assertEquals(statusLine, "HTTP/1.1 403 FORBIDDEN", "403 FORBIDDEN message is returned");
+
+        // Validate Headers Response
+        String headersResponse = response.getHeaders().toString();
+        // Test: Content-Type is present
+        assertTrue(headersResponse.contains("Content-Type"));
+        // Test: Content-Type header equals "application/json charset=utf-8"
+        String contentType = response.header("Content-Type");
+        assertEquals(contentType, "application/json; charset=utf-8");
+
+        // Validate the Response Body
+        String bodyResponse = response.getBody().prettyPrint();
+        // Test: Response body is not empty
+        assertNotNull(bodyResponse);
+    }
+    @Test
+    @Order(16)
+    @DisplayName("Test case: GET /GetPendingAdds - 200")
+    public void getGetPendingAdds_200() {
+        String accessToken = getAccessToken();
+        RestAssured.baseURI = String.format("https://%s/nga/api/v1%s/klfst?", baseURL, accountId);
+
+        Response response = given()
+                .accept("application/json, text/plain, */*")
+                .queryParam("status", "pending")
+                .queryParam("lim", "20")
+                .queryParam("o", "0")
+                .queryParam("query", "")
+                .queryParam("lang", "es")
+                .header("Authorization", "tag:scmcoord.com,2013:api " + accessToken)
+                .get();
+
+        // Validate the Response Code
+        // Test: Response Code == 200
+        assertEquals(200, response.getStatusCode(), "Correct status code returned");
+        // Test: Response status line is "HTTP/1.1 200 OK"
+        String statusLine = response.getStatusLine();
+        assertEquals(statusLine, "HTTP/1.1 200 OK", "200 OK message is returned");
+
+        // Validate Headers Response
+        String headersResponse = response.getHeaders().toString();
+        // Test: Content-Type is present
+        assertTrue(headersResponse.contains("Content-Type"));
+        // Test: Content-Type header equals "application/json charset=utf-8"
+        String contentType = response.header("Content-Type");
+        assertEquals(contentType, "application/json; charset=utf-8");
+
+        // Validate the Response Body
+        String bodyResponse = response.getBody().prettyPrint();
+        // Test: Response body is not empty
+        assertNotNull(bodyResponse);
+        // Test: Response body has an 'counter_map' field
+        assertTrue(bodyResponse.contains("counter_map"));
+    }
+
 
 }
