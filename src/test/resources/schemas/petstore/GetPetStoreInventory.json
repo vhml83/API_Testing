@@ -1,0 +1,20 @@
+{
+  "$schema": "http://json-schema.org/draft-04/schema#",
+  "type": "object",
+  "properties": {
+    "sold": {
+      "type": "integer"
+    },
+    "string": {
+      "type": "integer"
+    },
+    "available": {
+      "type": "integer"
+    }
+  },
+  "required": [
+    "sold",
+    "string",
+    "available"
+  ]
+}
