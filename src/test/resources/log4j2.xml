@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <appenders>
+        <File name="AutomationFile" fileName="target/automation.log" append="true">
+            <PatternLayout pattern="%d{ISO8601}{GMT} %p %m%n"/>
+        </File>
+        <Console name="AutomationConsole" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{ISO8601}{GMT} %p %m%n"/>
+        </Console>
+    </appenders>
+    <loggers>
+        <root level="INFO">
+            <appender-ref ref="AutomationFile"/>
+            <appender-ref ref="AutomationConsole"/>
+        </root>
+    </loggers>
+</configuration>
