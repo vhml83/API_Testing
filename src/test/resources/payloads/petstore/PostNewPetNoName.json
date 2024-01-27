@@ -1,0 +1,18 @@
+{
+  "id": 777,
+  "category": {
+    "id": 777,
+    "name":
+  },
+  "name":,
+  "photoUrls": [
+    "string"
+  ],
+  "tags": [
+    {
+      "id": 777,
+      "name":
+    }
+  ],
+  "status": "available"
+}

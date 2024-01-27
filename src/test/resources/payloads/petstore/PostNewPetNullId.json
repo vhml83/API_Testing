@@ -1,0 +1,18 @@
+{
+  "id": null,
+  "category": {
+    "id": null,
+    "name": "doggie"
+  },
+  "name": "doggie",
+  "photoUrls": [
+    "string"
+  ],
+  "tags": [
+    {
+      "id": null,
+      "name": "doggie"
+    }
+  ],
+  "status": "pending"
+}
